@@ -1,0 +1,26 @@
+version: '3'
+services:
+  web:
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    command: python /code/manage.py runserver 0.0.0.0:8000 --insecure
+    links:
+      - db
+      - redis
+  db:
+    image: postgres:10.5-alpine
+    ports:
+      - "127.0.0.1:5435:5432"
+  redis:
+    image: redis:latest
+  worker:
+    build: ./
+    env_file:
+      - .env
+    volumes:
+      - .:/code
+    command: celery -A zenhub_charts worker -B -l info
